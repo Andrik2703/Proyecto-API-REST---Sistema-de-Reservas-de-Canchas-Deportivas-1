@@ -52,7 +52,8 @@ Máximo 2 reservas activas por usuario - Evitar acaparamiento
 
 No se puede reservar en el pasado - Solo fechas futuras
 
-<img width="235" height="603" alt="image" src="https://github.com/user-attachments/assets/5afd5b9f-20a1-4496-8c05-b5d48ad03fa1" />
+<img width="452" height="455" alt="image" src="https://github.com/user-attachments/assets/4217b4fd-504d-4e91-a177-e829f54a4866" />
+
 
 🛠 Tecnologías Elegidas
 Framework Principal: FastAPI
