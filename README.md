@@ -372,3 +372,61 @@ source venv/bin/activate
 # Navegar a la carpeta app y ejecutar
 cd app
 uvicorn main:app --reload
+
+____________________________________________________________________________________________________
+🎯 Breve Explicación del Dominio
+El sistema permite a usuarios registrados reservar canchas deportivas en diferentes instalaciones. Los usuarios pueden:
+
+Buscar canchas disponibles por fecha, hora y tipo de deporte
+
+Realizar reservas
+
+Cancelar/modificar reservas (con políticas específicas)
+
+Ver historial de reservas
+
+Administradores pueden gestionar canchas, instalaciones y usuarios
+
+🔑 Decisiones Clave de Modelado
+1. Entidades Principales
+Usuario: Central para autenticación y autorización
+
+Reserva: Entidad core del negocio, representa la transacción principal
+
+Cancha: Recurso que se reserva, con características específicas
+
+2. Relaciones Implementadas
+1-N: Un Usuario → muchas Reservas
+
+N-N: Cancha → Equipamiento (a través de CanchaEquipamiento)
+
+1-N: Instalación → muchas Canchas
+
+3. Reglas de Integridad
+Email único en Usuario
+
+Combinación única de cancha + fecha + hora en Reserva
+
+Campos obligatorios según reglas de negocio
+
+Timestamps automáticos para auditoría
+
+4. Enums para Consistencia
+EstadoReserva: PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
+
+RolUsuario: ADMIN, CLIENTE
+
+TipoDeporte: FUTBOL, TENIS, BASQUETBOL, VOLEIBOL
+
+📊 Supuestos (Assumptions)
+Horarios de Reserva: Las reservas son por bloques de 1 hora
+
+Antelación: Las reservas deben hacerse con mínimo 24h de anticipación
+
+Cancelaciones: Cancelaciones con menos de 12h tienen penalización
+
+Pagos: Sistema externo de pagos (no modelado aquí)
+
+Disponibilidad: No hay solapamiento de reservas para misma cancha/hora
+
+
