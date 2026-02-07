@@ -1,0 +1,106 @@
+classDiagram
+    class User {
+        +int id
+        +str full_name
+        +str email
+        +str phone
+        +str password_hash
+        +UserRole role
+        +bool is_active
+        +datetime created_at
+        +datetime updated_at
+        +List~Booking~ bookings
+        +hash_password(password: str) void
+        +verify_password(password: str) bool
+    }
+    
+    class Court {
+        +int id
+        +str name
+        +SportType sport_type
+        +str description
+        +decimal price_per_hour
+        +bool is_available
+        +datetime created_at
+        +datetime updated_at
+        +List~Booking~ bookings
+        +List~Schedule~ schedules
+        +check_availability(date: datetime) bool
+    }
+    
+    class Booking {
+        +int id
+        +User user
+        +Court court
+        +datetime start_time
+        +datetime end_time
+        +BookingStatus status
+        +decimal total_amount
+        +datetime created_at
+        +datetime updated_at
+        +List~BookingService~ services
+        +calculate_total() decimal
+        +cancel() void
+        +confirm() void
+    }
+    
+    class Service {
+        +int id
+        +str name
+        +str description
+        +decimal price
+        +datetime created_at
+        +datetime updated_at
+        +List~BookingService~ booking_services
+    }
+    
+    class BookingService {
+        +int id
+        +Booking booking
+        +Service service
+        +int quantity
+        +decimal subtotal
+        +datetime created_at
+        +datetime updated_at
+        +calculate_subtotal() decimal
+    }
+    
+    class Schedule {
+        +int id
+        +Court court
+        +datetime date
+        +str time_slot
+        +bool is_available
+        +datetime created_at
+        +datetime updated_at
+    }
+    
+    class UserRole {
+        <<enumeration>>
+        CLIENT
+        ADMIN
+    }
+    
+    class SportType {
+        <<enumeration>>
+        SOCCER
+        TENNIS
+        BASKETBALL
+        VOLLEYBALL
+    }
+    
+    class BookingStatus {
+        <<enumeration>>
+        PENDING
+        CONFIRMED
+        CANCELLED
+        COMPLETED
+    }
+    
+    User "1" --> "*" Booking : makes
+    Court "1" --> "*" Booking : has
+    Court "1" --> "*" Schedule : contains
+    Booking "1" --> "*" BookingService : includes
+    Service "1" --> "*" BookingService : offered_in
+    BookingService "*" --> "1" Booking : belongs_to
+    BookingService "*" --> "1" Service : refers_to

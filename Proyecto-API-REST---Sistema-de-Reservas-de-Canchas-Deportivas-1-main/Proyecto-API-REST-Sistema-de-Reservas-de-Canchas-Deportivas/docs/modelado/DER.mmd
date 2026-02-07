@@ -1,0 +1,72 @@
+erDiagram
+    User {
+        int id PK
+        string full_name
+        string email UK "CONSTRAINT UNIQUE"
+        string phone
+        string password_hash
+        string role
+        datetime created_at
+        datetime updated_at
+        boolean is_active
+    }
+    
+    Court {
+        int id PK
+        string name
+        string sport_type
+        string description
+        decimal price_per_hour
+        boolean is_available
+        datetime created_at
+        datetime updated_at
+    }
+    
+    Booking {
+        int id PK
+        int user_id FK
+        int court_id FK
+        datetime start_time
+        datetime end_time
+        string status
+        decimal total_amount
+        datetime created_at
+        datetime updated_at
+    }
+    
+    Service {
+        int id PK
+        string name
+        string description
+        decimal price
+        datetime created_at
+        datetime updated_at
+    }
+    
+    BookingService {
+        int id PK
+        int booking_id FK
+        int service_id FK
+        int quantity
+        decimal subtotal
+        datetime created_at
+        datetime updated_at
+    }
+    
+    Schedule {
+        int id PK
+        int court_id FK
+        datetime date
+        string time_slot
+        boolean is_available
+        datetime created_at
+        datetime updated_at
+    }
+    
+    User ||--o{ Booking : makes
+    Court ||--o{ Booking : has
+    Court ||--o{ Schedule : has
+    Booking ||--o{ BookingService : includes
+    Service ||--o{ BookingService : offered_in
+    BookingService }o--|| Booking : belongs_to
+    BookingService }o--|| Service : includes
