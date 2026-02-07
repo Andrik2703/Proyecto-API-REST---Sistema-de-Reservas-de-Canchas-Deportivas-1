@@ -1,92 +1,78 @@
 # Modelado del Dominio - Sistema de Reservas de Canchas Deportivas
 
 ## 🎯 Dominio del Sistema
-
-El sistema resuelve la gestión integral de reservas para canchas deportivas, permitiendo a los usuarios:
-- Buscar y reservar canchas disponibles según deporte y horario
-- Gestionar pagos y confirmaciones de reservas
-- Administrar equipos adicionales (pelotas, bebidas, etc.)
-- Controlar la disponibilidad de canchas mediante horarios predefinidos
+Este sistema permite la gestión integral de reservas para canchas deportivas, facilitando a los usuarios:
+- Búsqueda y reserva de canchas disponibles
+- Adición de servicios adicionales (alquiler de equipo, entrenador, etc.)
+- Gestión de pagos y estados de reserva
+- Administración de horarios y disponibilidad
 
 ## 🏗️ Decisiones Clave del Modelado
 
-### 1. Estructura de Entidades
-- **Usuario**: Centraliza todas las operaciones del cliente
-- **Cancha (Field)**: Entidad principal del negocio con atributos específicos por deporte
-- **Reserva**: Gestiona el ciclo de vida completo de una reserva
-- **Items de Reserva**: Permite agregar productos/servicios adicionales (relación 1:N)
-- **Pago**: Separa la lógica financiera de la reserva
-- **Horario (Schedule)**: Controla disponibilidad por día y hora
+### 1. Entidades Principales
+- **User**: Representa usuarios del sistema (clientes y administradores)
+- **Court**: Cancha deportiva disponible para reserva
+- **Booking**: Reserva principal que relaciona usuario, cancha y servicios
+- **Service**: Servicios adicionales disponibles (entidad para relación N-N)
+- **BookingService**: Entidad puente para relación N-N entre Booking y Service
+- **Schedule**: Horarios específicos de disponibilidad de canchas
 
 ### 2. Relaciones Implementadas
-- **1:N**: Usuario → Reservas (un usuario muchas reservas)
-- **1:N**: Cancha → Reservas (una cancha muchas reservas)
-- **1:N**: Reserva → Items (una reserva muchos items)
-- **N:N Implícita**: Usuario ↔ Cancha (a través de Reservas)
-- **1:1**: Reserva → Pago (cada reserva tiene un pago asociado)
+- **1-N**: User → Bookings (un usuario muchas reservas)
+- **1-N**: Court → Bookings (una cancha muchas reservas)
+- **N-N**: Booking ↔ Service (muchos servicios en muchas reservas)
+  - **BookingService** es la entidad puente con atributos adicionales
+- **1-N**: Court → Schedules (una cancha muchos horarios)
 
 ### 3. Reglas de Integridad
-- Email único por usuario
-- Transaction_id único por pago
-- Precios positivos en todos los modelos
-- Rangos de tiempo válidos (end_time > start_time)
-- Cantidades positivas en items
+- **UNIQUE**: Email de usuario (no se permiten duplicados)
+- **NOT NULL**: Campos obligatorios en todas las entidades
+- **CHECK**: Validación de fechas (end_time > start_time)
+- **FOREIGN KEYS**: Todas las relaciones con integridad referencial
+- **TIMESTAMPS**: created_at y updated_at en todas las entidades
 
 ### 4. Normalización
-- Separación de preocupaciones: reservas, pagos, items
-- Tabla Schedule para horarios reutilizables
-- Enums para estados consistentes (ReservationStatus, PaymentStatus)
+- Separación de servicios en entidad independiente
+- Entidad puente para relación N-N con atributos propios
+- Evitar datos duplicados mediante relaciones
 
-## 📝 Supuestos (Assumptions)
+## 📋 Supuestos del Modelo
 
 ### Supuestos de Negocio
-1. Las reservas se cobran por hora completa
-2. Los precios de canchas son fijos por hora
-3. Los items adicionales tienen precios unitarios
-4. Un pago corresponde a una sola reserva
-5. Los horarios de canchas se definen por día de semana
+1. Las reservas tienen una duración mínima de 1 hora
+2. Los servicios adicionales son opcionales
+3. Los usuarios deben estar registrados para reservar
+4. Las canchas tienen disponibilidad por horarios específicos
+5. Los precios de servicios pueden variar independientemente
 
 ### Supuestos Técnicos
-1. Sistema multi-usuario con roles (cliente, admin, manager)
-2. Base de datos relacional (PostgreSQL/MySQL/SQLite)
-3. API RESTful para frontend/móvil
-4. Autenticación basada en tokens JWT
-5. Zona horaria UTC para consistencia
+1. Base de datos PostgreSQL con soporte para tipos ENUM
+2. Huso horario configurado para toda la aplicación
+3. Validación de solapamiento de horarios a nivel de aplicación
+4. Sistema de autenticación basado en email/password
 
-## 🔧 Validaciones Implementadas
+## 🔧 Cumplimiento de Requisitos
 
-### Validaciones de Dominio
-1. **Usuario**: Email válido, contraseña encriptada
-2. **Reserva**: No superposición de horarios, estado válido
-3. **Pago**: Monto positivo, estado válido
-4. **Cancha**: Precio positivo, capacidad positiva
-5. **Items**: Cantidad positiva, precio positivo
+### ✅ Requisitos Mínimos Cumplidos
+1. **5+ entidades**: User, Court, Booking, Service, BookingService, Schedule (6 entidades)
+2. **Entidad Usuario**: User con sistema de autenticación
+3. **Entidad principal**: Booking como núcleo del negocio
+4. **Entidad de detalle**: BookingService como entidad puente
+5. **Timestamps**: created_at, updated_at en todas las entidades
+6. **Relación 1-N**: User → Bookings, Court → Bookings
+7. **Relación N-N**: Booking ↔ Service (con BookingService como puente)
+8. **Regla de integridad**: Email único en User
 
-### Validaciones Temporales
-- `created_at`: Fecha de creación automática
-- `updated_at`: Actualización automática al modificar
-- `payment_date`: Fecha del pago procesado
+### ✅ Implementación ORM
+- Modelos SQLAlchemy con relaciones bidireccionales
+- Constraints a nivel de base de datos
+- Migraciones con Alembic
+- Enums para tipos predefinidos
+- Métodos de negocio en los modelos
 
-## 🚀 Consideraciones para Extensión
-
-### Escalabilidad
-1. Agregar tabla `Promotions` para descuentos
-2. Tabla `Reviews` para calificaciones de canchas
-3. `Notification` para recordatorios de reservas
-4. `Team` para reservas grupales
-
-### Rendimiento
-- Índices en campos de búsqueda frecuente
-- Caché de disponibilidad de canchas
-- Paginación en listados grandes
-
-## 📊 Requisitos Mínimos Cumplidos
-
-✅ **5+ Entidades**: User, Field, Reservation, ReservationItem, Payment, Schedule  
-✅ **Entidad Usuario**: User con autenticación y roles  
-✅ **Entidad Principal**: Field (cancha deportiva)  
-✅ **Entidad de Detalle**: ReservationItem (items adicionales)  
-✅ **Timestamps**: created_at, updated_at en todas las entidades  
-✅ **Relación 1:N**: User → Reservations  
-✅ **Relación N:N**: User ↔ Field (a través de Reservation)  
-✅ **Reglas de Integridad**: Unique constraints, check constraints, not null
+## 🚀 Próximos Pasos
+1. Implementar sistema de pagos
+2. Añadir sistema de calificaciones
+3. Implementar notificaciones por email
+4. Añadir reportes y estadísticas
+5. Integración con APIs de pago externas
